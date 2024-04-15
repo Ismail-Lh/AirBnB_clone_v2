@@ -2,7 +2,7 @@
 """ Console Module """
 import cmd
 import sys
-from models.base_model import BaseModel
+from models.base_model import BaseModel, Base
 from models.__init__ import storage
 from models.user import User
 from models.place import Place
@@ -26,6 +26,7 @@ class HBNBCommand(cmd.Cmd):
         "City": City,
         "Amenity": Amenity,
         "Review": Review,
+        "Base": Base
     }
 
     valid_keys = {
@@ -278,22 +279,28 @@ class HBNBCommand(cmd.Cmd):
         print("Destroys an individual instance of a class")
         print("[Usage]: destroy <className> <objectId>\n")
 
-    def do_all(self, args):
+    def do_all(self, arg):
         """Shows all objects, or all objects of a class"""
-        print_list = []
+        obj_list = []
+        args = arg.split(" ")  # remove possible trailing args
 
-        if args:
-            args = args.split(" ")[0]  # remove possible trailing args
-            if args not in HBNBCommand.classes:
-                print("** class doesn't exist **")
-                return
-            for k, v in storage.all().items():
-                if k.split(".")[0] == args:
-                    print_list.append(str(v))
+        if len(args) == 0:
+            obj_dict = storage.all()
+        elif args[0] in HBNBCommand.classes:
+            obj_dict = storage.all(HBNBCommand.classes[args[0]])
         else:
-            for k, v in storage.all().items():
-                print_list.append(str(v))
-        print(print_list)
+            print("** class doesn't exist **")
+            return
+
+        if '_sa_instance_state' in obj_dict:
+            del obj_dict['_sa_instance_state']
+
+        for key in obj_dict:
+            obj_list.append(str(obj_dict[key]))
+
+        print("[", end="")
+        print(", ".join(obj_list), end="")
+        print("]")
 
     def help_all(self):
         """Help information for the all command"""

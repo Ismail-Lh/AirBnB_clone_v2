@@ -11,6 +11,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from os import getenv
 
+classes = {"Amenity": Amenity, "City": City,
+           "Place": Place, "Review": Review, "State": State, "User": User}
+
 
 class DBStorage:
     """Class Docs"""
@@ -42,39 +45,18 @@ class DBStorage:
         )
         self.__session = Session()
 
-    def all(self, cls=None, id=None):
-        """
-        Query all classes or specific one by ID
-        """
-        allClasses = [User, Place, State, City, Amenity, Review]
-        result = {}
+    def all(self, cls=None):
+        """query on the current database session"""
+        new_dict = {}
 
-        if cls is not None:
-            if id is not None:
-                obj = self.__session.query(cls).get(id)
-                if obj is not None:
-                    ClassName = obj.__class__.__name__
-                    keyName = ClassName + "." + str(obj.id)
-                    result[keyName] = obj
-            else:
-                for obj in self.__session.query(cls).all():
-                    ClassName = obj.__class__.__name__
-                    keyName = ClassName + "." + str(obj.id)
-                    result[keyName] = obj
-        else:
-            for clss in allClasses:
-                if id is not None:
-                    obj = self.__session.query(clss).get(id)
-                    if obj is not None:
-                        ClassName = obj.__class__.__name__
-                        keyName = ClassName + "." + str(obj.id)
-                        result[keyName] = obj
-                else:
-                    for obj in self.__session.query(clss).all():
-                        ClassName = obj.__class__.__name__
-                        keyName = ClassName + "." + str(obj.id)
-                        result[keyName] = obj
-        return result
+        for cls_name in classes:
+            if cls is None or cls is classes[cls_name] or cls is cls_name:
+                objs = self.__session.query(classes[cls_name]).all()
+                for obj in objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    new_dict[key] = obj
+
+        return (new_dict)
 
     def search(self, cls, id):
         """ def doc """
