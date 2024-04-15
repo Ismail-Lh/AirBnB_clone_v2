@@ -10,24 +10,29 @@ from sqlalchemy.orm import relationship
 
 class State(BaseModel, Base):
     """ State class """
-    __tablename__ = "states"
 
-    if storage_type != "db":
-        name = ""
+    if storage_type == "db":
+        __tablename__ = "states"
 
-        @property
-        def cities(self):
-            """returns the list of City instances"""
-            from models import storage
-
-            cities_instances = []
-            all_cities = storage.all(City)
-
-            for city in all_cities.values():
-                if city.state_id == self.id:
-                    cities_instances.append(city)
-
-            return cities_instances
-    else:
         name = Column(String(128), nullable=False)
         cities = relationship("City", backref="state", cascade="all, delete")
+    else:
+        name = ""
+
+    def __init__(self, *args, **kwargs):
+        """initializes State"""
+        super().__init__(*args, **kwargs)
+
+    @property
+    def cities(self):
+        """returns the list of City instances"""
+        from models import storage
+
+        cities_instances = []
+        all_cities = storage.all(City)
+
+        for city in all_cities.values():
+            if city.state_id == self.id:
+                cities_instances.append(city)
+
+        return cities_instances
