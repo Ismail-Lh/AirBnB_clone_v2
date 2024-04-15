@@ -7,20 +7,23 @@ import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, DateTime
 
-
-Base = declarative_base()
+if models.storage_type == "db":
+    Base = declarative_base()
+else:
+    Base = object
 
 
 class BaseModel:
     """A base class for all hbnb models"""
 
-    id = Column(String(60), primary_key=True,
-                nullable=False, unique=True)
-    created_at = Column(DateTime, nullable=False,
-                        default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False,
-                        default=datetime.datetime.utcnow,
-                        onupdate=datetime.datetime.utcnow)
+    if models.storage_type == "db":
+        id = Column(String(60), primary_key=True,
+                    nullable=False, unique=True)
+        created_at = Column(DateTime, nullable=False,
+                            default=datetime.datetime.utcnow)
+        updated_at = Column(DateTime, nullable=False,
+                            default=datetime.datetime.utcnow,
+                            onupdate=datetime.datetime.utcnow)
 
     def __init__(self, *args, **kwargs) -> None:
         """Initialization of BaseModel Class"""
