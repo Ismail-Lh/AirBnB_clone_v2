@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 """ Place Module for HBNB project """
 from models.base_model import BaseModel, Base
-from models import storage_type
+import models
 
 from sqlalchemy import Column, String, ForeignKey, Integer, Float
+from sqlalchemy.orm import relationship
 
 
 class Place(BaseModel, Base):
     """ A place to stay """
 
-    if storage_type == "db":
+    if models.storage_type == "db":
         __tablename__ = "places"
 
         city_id = Column(String(60), ForeignKey("cities.id"), nullable=False)
@@ -22,6 +23,7 @@ class Place(BaseModel, Base):
         price_by_night = Column(Integer, nullable=False, default=0)
         latitude = Column(Float, nullable=True, default=0)
         longitude = Column(Float, nullable=False)
+        reviews = relationship('Review', backref="place")
     else:
         city_id = ""
         user_id = ""
@@ -38,3 +40,18 @@ class Place(BaseModel, Base):
     def __init__(self, *args, **kwargs):
         """initializes Place"""
         super().__init__(*args, **kwargs)
+
+    if models.storage_type != 'db':
+        @property
+        def reviews(self):
+            """Getter attribute reviews that returns
+            the list of Review instances"""
+            from models.review import Review
+
+            review_list = []
+            all_reviews = models.storage.all(Review)
+
+            for review in all_reviews.values():
+                if review.place_id == self.id:
+                    review_list.append(review)
+            return review_list
